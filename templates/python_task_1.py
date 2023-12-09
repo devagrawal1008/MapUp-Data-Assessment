@@ -1,6 +1,8 @@
 import pandas as pd
 
+df = pd.read_csv('dataset-1.csv')
 
+#Task1-Question1
 def generate_car_matrix(df)->pd.DataFrame:
     """
     Creates a DataFrame  for id combinations.
@@ -12,11 +14,16 @@ def generate_car_matrix(df)->pd.DataFrame:
         pandas.DataFrame: Matrix generated with 'car' values, 
                           where 'id_1' and 'id_2' are used as indices and columns respectively.
     """
-    # Write your logic here
+   # Pivot the DataFrame to get the desired matrix
+    car_matrix = df.pivot(index='id_1', columns='id_2', values='car').fillna(0)
 
-    return df
+    # Set diagonal values to 0
+    car_matrix.values[[range(len(car_matrix))]*2] = 0
 
+    return car_matrix
+generate_car_matrix(df)
 
+#Task1-Question2
 def get_type_count(df)->dict:
     """
     Categorizes 'car' values into types and returns a dictionary of counts.
@@ -27,11 +34,19 @@ def get_type_count(df)->dict:
     Returns:
         dict: A dictionary with car types as keys and their counts as values.
     """
-    # Write your logic here
+    # Add a new column 'car_type' based on the conditions
+    df['car_type'] = pd.cut(df['car'], bins=[-float('inf'), 15, 25, float('inf')],
+                                   labels=['low', 'medium', 'high'], right=False)
+    # Calculate the count of occurrences for each car_type category
+    type_counts = df['car_type'].value_counts().to_dict()
 
-    return dict()
+    # Sort the dictionary alphabetically based on keys
+    sorted_type_counts = dict(sorted(type_counts.items()))
 
+    return sorted_type_counts
+get_type_count(df)
 
+#Task1-Question3        
 def get_bus_indexes(df)->list:
     """
     Returns the indexes where the 'bus' values are greater than twice the mean.
@@ -42,11 +57,19 @@ def get_bus_indexes(df)->list:
     Returns:
         list: List of indexes where 'bus' values exceed twice the mean.
     """
-    # Write your logic here
+    # Calculate the mean value of the 'bus' column
+    mean_bus_value = df['bus'].mean()
 
-    return list()
+    # Identify indices where the 'bus' values are greater than twice the mean
+    bus_indexes = df[df['bus'] > 2 * mean_bus_value].index.tolist()
 
+    # Sort the indices in ascending order
+    bus_indexes.sort()
 
+    return bus_indexes
+get_bus_indexes(df)  
+
+#Task1-Question4
 def filter_routes(df)->list:
     """
     Filters and returns routes with average 'truck' values greater than 7.
@@ -57,9 +80,15 @@ def filter_routes(df)->list:
     Returns:
         list: List of route names with average 'truck' values greater than 7.
     """
-    # Write your logic here
+    # Filter rows where the average of the 'truck' column is greater than 7
+    filtered_data = df.groupby('route')['truck'].mean().reset_index()
+    filtered_data = filtered_data[filtered_data['truck'] > 7]
 
-    return list()
+    # Sort the routes
+    sorted_routes = filtered_data['route'].sort_values().tolist()
+
+    return sorted_routes
+filter_routes(df)
 
 
 def multiply_matrix(matrix)->pd.DataFrame:
