@@ -90,7 +90,7 @@ def filter_routes(df)->list:
     return sorted_routes
 filter_routes(df)
 
-
+#Task1-Question5
 def multiply_matrix(matrix)->pd.DataFrame:
     """
     Multiplies matrix values with custom conditions.
@@ -101,11 +101,18 @@ def multiply_matrix(matrix)->pd.DataFrame:
     Returns:
         pandas.DataFrame: Modified matrix with values multiplied based on custom conditions.
     """
-    # Write your logic here
+    modified_df = matrix.copy()  # Create a copy to avoid modifying the original DataFrame
 
-    return matrix
+    # Apply the specified logic to each value in the DataFrame
+    modified_df = modified_df.applymap(lambda x: x * 0.75 if x > 20 else x * 1.25)
 
+    # Round the values to 1 decimal place
+    modified_df = modified_df.round(1)
 
+    return modified_df
+multiply_matrix(matrix)
+
+#Task1-Question6
 def time_check(df)->pd.Series:
     """
     Use shared dataset-2 to verify the completeness of the data by checking whether the timestamps for each unique (`id`, `id_2`) pair cover a full 24-hour and 7 days period
@@ -116,6 +123,18 @@ def time_check(df)->pd.Series:
     Returns:
         pd.Series: return a boolean series
     """
-    # Write your logic here
+    # Convert timestamp columns to datetime objects
+    df['start_datetime'] = pd.to_datetime(df['startDay'] + ' ' + df['startTime'])
+    df['end_datetime'] = pd.to_datetime(df['endDay'] + ' ' + df['endTime'])
 
-    return pd.Series()
+    # Calculate the time difference
+    df['time_diff'] = df['end_datetime'] - df['start_datetime']
+
+    # Create a mask for incorrect timestamps
+    mask = (df['time_diff'] < pd.Timedelta(24, 'h')) | (df['start_datetime'].dt.weekday < 0) | (df['end_datetime'].dt.weekday < 0)
+
+    # Group by (id, id_2) and check if any entry in the group has incorrect timestamps
+    result = df.groupby(['id', 'id_2'])['time_diff'].apply(lambda x: x.any() or mask.any())
+
+    return result
+time_check(df)
